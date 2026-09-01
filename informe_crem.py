@@ -1965,6 +1965,11 @@ def _seccion_aplica(modules: dict, sid: str) -> bool:
         return True
     return any(modules.get(m) for m in mods)
 
+# NOTA DE SEGURIDAD: estas .pkl solo las escribe y lee el propio proceso local
+# (caché de recálculo, nunca expuesta por red ni aceptada de fuera). pickle es
+# inseguro con datos no confiables — si algún día esta caché se sirve o se
+# acepta desde fuera del proceso (p.ej. subida en el dashboard), cambiar de
+# formato (parquet/feather) antes de exponerla.
 def _cache_path(nombre: str) -> Path:
     return CTX.dir_datos / f"{nombre}.pkl"
 

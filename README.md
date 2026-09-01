@@ -36,8 +36,10 @@ Los datos pueden venir de **dos fuentes**, ambas soportadas:
 ## 1. Requisitos e instalación
 
 ```
-Python 3.10+
+Python 3.12+
 ```
+
+> Los f-strings del generador de HTML usan sintaxis (PEP 701) que solo el parser de Python 3.12+ acepta — en 3.10/3.11 `informe_crem.py` falla al importar con un `SyntaxError`.
 
 Todas las dependencias están en `requirements.txt`:
 
