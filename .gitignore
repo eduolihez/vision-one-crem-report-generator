@@ -1,0 +1,19 @@
+# Datos y credenciales de cliente — NUNCA deben subirse a un repo público
+CLIENTES/
+*.env
+!.env.template
+
+# Caché de enriquecimiento de CVEs (se regenera sola en el primer uso)
+cve_cache/
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+
+# Datos intermedios
+datos/
+*.pkl
+
+# Logs de ejecución
+log_*.txt

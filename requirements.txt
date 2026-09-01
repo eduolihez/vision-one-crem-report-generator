@@ -1,0 +1,31 @@
+# CREM — Dependencias del generador de informes
+#
+#   pip install -r requirements.txt
+#
+# Rangos permisivos, para instalar de cero. Para REPRODUCIR exactamente el
+# entorno con el que se generan los informes que se entregan al cliente, usa:
+#
+#   pip install -r requirements.lock
+#
+# Por qué importa: una subida de pandas cambió el tipo que devuelve read_csv
+# (StringDtype en lugar de object) y los valores vacíos empezaron a imprimirse
+# como el texto "nan" DENTRO del informe del cliente. Está corregido en
+# _leer_csv_raw(), pero la lección es que aquí un `pip install -U` a ciegas se
+# ve en el entregable.
+
+# ── Núcleo ────────────────────────────────────────────────────────────────────
+pandas>=2.0,<4
+python-docx>=1.0
+openpyxl>=3.1
+lxml>=4.9
+rich>=13.0
+reportlab>=4.0
+
+# ── Panel web (crem_dashboard.py) ─────────────────────────────────────────────
+flask>=2.3
+
+# ── Interfaz de escritorio y exportación a PDF ────────────────────────────────
+# PyQt6-WebEngine es lo que convierte el HTML ejecutivo en PDF. Sin él, el
+# informe ejecutivo se genera igual pero solo queda en HTML.
+PyQt6>=6.5
+PyQt6-WebEngine>=6.5

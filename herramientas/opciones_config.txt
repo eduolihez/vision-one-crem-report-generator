@@ -1,0 +1,13 @@
+empresa — Nombre de la empresa. Se rellena automáticamente al crear el config. No tiene efecto funcional actualmente (el nombre viene del menú de selección), pero sirve como referencia para saber a qué empresa pertenece el fichero.
+
+sla_critico_dias / sla_alto_dias / sla_medio_dias — Define en cuántos días debería resolverse cada nivel de criticidad. En este momento están definidos pero no se usan activamente en el script — son un placeholder preparado para una futura funcionalidad que mostraría cuántos días lleva cada problema sin resolver y si ha superado el SLA.
+
+meses_reincidente — Número mínimo de meses consecutivos que tiene que llevar un CVE sin resolver para que el script lo marque como "reincidente" en la sección de activos reincidentes. Con 2, un CVE que aparezca en el mes actual y en al menos 2 históricos anteriores se considera reincidente.
+
+modulos_ignorar — Lista de módulos que quieres excluir del informe. Por ejemplo ["cloud-app", "anomaly-detections"] haría que esos CSVs no se procesaran. Actualmente no está implementado — es otro placeholder preparado para añadir esa funcionalidad.
+
+notas_adicionales — Texto libre que aparecería en el informe. Actualmente no se usa — placeholder para añadir un bloque de notas del técnico al informe.
+
+contacto_tecnico — Nombre o email del técnico responsable. Actualmente no se usa — pensado para aparecer en el pie del informe o en el plan de actuación.
+
+abrir_html_al_terminar — Si se pone a true, al terminar de generar el informe se abre el HTML automáticamente en el navegador predeterminado. Este sí funciona.

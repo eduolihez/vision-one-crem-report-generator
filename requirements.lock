@@ -1,0 +1,22 @@
+# CREM — Entorno EXACTO con el que se generan los informes entregados.
+#
+#   pip install -r requirements.lock
+#
+# Congelado el 2026-09-01 sobre Python 3.13.12 (64 bits, Windows).
+# Estos informes van a clientes: la versión de las librerías forma parte del
+# resultado, no es un detalle de instalación. Antes de subir cualquiera de
+# estas versiones, ejecuta la regresión y comprueba que las cifras no cambian:
+#
+#   python tests/test_regresion.py
+
+pandas==3.0.1
+numpy==2.4.2
+python-docx==1.2.0
+openpyxl==3.1.5
+lxml==6.0.2
+rich==14.3.3
+reportlab==4.2.5
+Flask==3.1.3
+PyQt6==6.11.0
+PyQt6-Qt6==6.11.1
+PyQt6-WebEngine==6.11.0

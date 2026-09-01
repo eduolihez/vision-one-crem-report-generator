@@ -1,0 +1,6 @@
+﻿Status,Risk event,Data source / processor,Impact scope,Event risk level,Detected,Case,Remediation,Suggested actions,Detail info;;;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;Power Platform Copilot Governance - IL;App Service|logonAdditionalDetails: MFA requirement satisfied by claim in the token;Assertion is invalid because of various reasons:

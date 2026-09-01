@@ -1,0 +1,10 @@
+1. (FILTRO EVENTS) 	-- Highly Exploitable CVE's - Internal Assets 		--> cve-events.csv
+2. (FILTRO ASSETS) 	-- Highly Exploitable CVE's - Internal Assets 		--> cve-assets.csv
+3. (FILTRO ALL) 	-- Account Compromise Indicators 					--> account-compromise.csv
+4. (FILTRO ALL) 	-- Anomaly-Detections 								--> anomaly-detections.csv
+5. (FILTRO ALL) 	-- Cloud App Activity Risk Events					--> cloud-app.csv
+6. (FILTRO ALL)		-- System configuration risk events					--> sys-conf.csv
+7. XDR NO DEJA EXPORTAR
+8. (FILTRO ALL)		-- Threat Detections								--> threat-detections.csv
+9. (FILTRO ALL)		-- Security configuration risk events				--> security-conf.csv
+10.(FILTRO ALL)		-- Predictive analytics								--> predictive-analytics.csv
