@@ -18,6 +18,7 @@ import csv, json, queue, traceback, webbrowser
 from datetime import date, timedelta, datetime
 from pathlib import Path
 from flask import Flask, Response, jsonify, render_template_string, request
+from werkzeug.utils import secure_filename
 
 _DIR = Path(__file__).parent
 _INFORME_PY = _DIR / "informe_crem.py"
@@ -66,6 +67,9 @@ def _get_meses():
 _CLIENTES_DIR = _DIR / "CLIENTES"
 def _emp(nombre):
     slug = nombre.replace("/","_").replace("\\","_").replace(":","_").strip()
+    if slug in ("", ".", ".."):
+        # Evita que un slug de un solo segmento como ".." escape de CLIENTES/
+        slug = "_"
     p_cli = _CLIENTES_DIR / slug
     return p_cli if _CLIENTES_DIR.is_dir() else (_DIR / slug)
 def _cfg_path(n):  return _emp(n) / "config.json"
@@ -1994,10 +1998,14 @@ def api_upload_csv(nombre):
         
     uploaded = []
     for f in files:
-        if f.filename:
-            dest = csv_dir / f.filename
-            f.save(str(dest))
-            uploaded.append(f.filename)
+        nombre_seguro = secure_filename(f.filename or "")
+        if not nombre_seguro:
+            continue
+        dest = csv_dir / nombre_seguro
+        if csv_dir.resolve() not in dest.resolve().parents:
+            continue  # nunca debería pasar tras secure_filename(), cinturón y tirantes
+        f.save(str(dest))
+        uploaded.append(nombre_seguro)
             
     try:
         from informe_crem import normalizar_csvs
