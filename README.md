@@ -1,11 +1,25 @@
 # CREM — Cybersecurity Risk, Exposure & Management Review
 
+![Python](https://img.shields.io/badge/python-3.12%2B-blue)
+![License](https://img.shields.io/badge/license-MIT-green)
+![Status](https://img.shields.io/badge/status-uso%20interno%20real-orange)
+
 Sistema automatizado de generación de informes de seguridad mensual basado en **Trend Micro Vision One**. Extrae, normaliza y presenta todos los eventos de seguridad del tenant en informes HTML interactivos (responsive), Word y PDF.
 
 Los datos pueden venir de **dos fuentes**, ambas soportadas:
 
 - **API de Vision One** — descarga automática (requiere API key con permisos de Reports)
 - **CSVs exportados a mano** desde el portal — se arrastran al dashboard y se renombran/normalizan solos
+
+**De un vistazo:**
+
+- 🔌 Cliente propio de la API Vision One (`trendai_api.py`, ~3.100 líneas, solo `urllib` de la stdlib) que cubre **32 endpoints** en 10 categorías, con auto-descubrimiento de módulos contratados y fallback automático cuando un módulo no está disponible.
+- 📊 Generador de informes (`informe_crem.py`, ~6.800 líneas) que produce **Word, HTML técnico, HTML ejecutivo y PDF** a partir de los mismos datos — diff de CVEs mes a mes, detección de activos reincidentes, tendencia histórica y un cálculo de riesgo propio (**Riesgo CREM**, 0–100).
+- 🛡️ Enriquecimiento automático de **cada CVE** contra NVD, CISA KEV y EPSS, con caché en disco para poder regenerar informes 100% offline.
+- 🖥️ Dashboard de escritorio (`crem_dashboard.py`, Flask + PyQt6) con generación de informes, histórico, gestión multi-cliente y subida de CSVs por arrastrar-y-soltar.
+- 🗂️ Multi-cliente desde el primer día: cada empresa tiene su propia configuración, inventario de activos, SLAs e histórico, aislados entre sí.
+
+Es una herramienta que uso en producción para generar informes mensuales reales de clientes — no es una demo ni un prototipo. Este repositorio es una versión sanitizada: nombres de cliente, inventarios de infraestructura real y credenciales se han sustituido por ejemplos genéricos antes de publicarla (ver [Aviso](#aviso) al final).
 
 ---
 
@@ -30,6 +44,9 @@ Los datos pueden venir de **dos fuentes**, ambas soportadas:
 17. [Test de API (`herramientas/test_api.py`)](#17-test-de-api-herramientastest_apipy)
 18. [Solución de problemas](#18-solución-de-problemas)
 19. [Desarrollo: pruebas y cambios en el código](#19-desarrollo-pruebas-y-cambios-en-el-código)
+20. [Notas técnicas](#notas-técnicas)
+21. [Aviso](#aviso)
+22. [Licencia](#licencia)
 
 ---
 
@@ -777,13 +794,14 @@ python herramientas/test_api.py --env /ruta/al/.env
 
 ### Prueba de regresión
 
-El repositorio original de este proyecto incluye una prueba de regresión
-(`tests/test_regresion.py`) que reproduce un mes real ya cerrado de un cliente
-sobre una **copia temporal** de sus CSV archivados —nunca toca `CLIENTES/`— y
-comprueba cifra a cifra el resultado: filas por módulo, diff de CVEs,
-comparativa mes a mes, resumen, reincidentes, orden de la tendencia y Riesgo
-CREM. Se ha omitido de esta versión pública porque depende de datos reales de
-cliente que no se distribuyen aquí.
+En uso interno, este proyecto se apoya en una prueba de regresión
+(`tests/test_regresion.py`, no incluida aquí) que reproduce un mes real ya
+cerrado de un cliente sobre una **copia temporal** de sus CSV archivados
+—nunca toca `CLIENTES/`— y comprueba cifra a cifra el resultado: filas por
+módulo, diff de CVEs, comparativa mes a mes, resumen, reincidentes, orden de
+la tendencia y Riesgo CREM. Se ha omitido de esta versión pública porque sus
+cifras esperadas están calculadas sobre datos reales de cliente que no se
+distribuyen aquí.
 
 Si vas a modificar el cálculo, te recomendamos montar tu propia versión de
 esta prueba contra un mes tuyo ya cerrado, con las cifras esperadas escritas a
@@ -823,4 +841,20 @@ informe del cliente.
 - **Deduplicación**: las alertas Workbench se deduplican por ID para no contar la misma alerta dos veces aunque aparezca en múltiples estrategias de extracción
 - **Fallback automático**: si ASM no está disponible, el sistema busca CVEs vía Search API; si cloudAccess no está, busca eventos cloud en Workbench
 - **Rate limiting**: la extracción respeta el header `Retry-After` en respuestas 429 y reintenta con backoff exponencial para errores 5xx
-- **Seguridad**: los `.env` contienen credenciales — no subir a git ni compartir por email
+- **Seguridad**: los `.env` contienen credenciales — no subir a git ni compartir por email (ya cubierto por el `.gitignore` del repo)
+
+---
+
+## Aviso
+
+Este es un proyecto **personal e independiente**, no afiliado a, ni respaldado ni certificado por Trend Micro. "Trend Micro" y "Vision One" son marcas de sus respectivos propietarios; este repositorio solo consume su API pública documentada.
+
+Es la versión pública de una herramienta que uso en producción. Antes de publicarla se retiraron por completo: nombres y CSVs de clientes reales, un inventario de infraestructura real que estaba hardcodeado en el código, credenciales (`.env`, API keys) y cualquier informe ya generado. Lo que queda es el motor genérico — cualquier `CLIENTES/[empresa]/` que crees tú se queda en tu máquina y nunca se sube al repo gracias al `.gitignore`.
+
+## Licencia
+
+[MIT](LICENSE) — úsalo, modifícalo y redistribúyelo libremente.
+
+## Autor
+
+Eduardo Olivares
