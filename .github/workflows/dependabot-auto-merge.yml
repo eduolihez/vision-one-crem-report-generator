@@ -1,0 +1,50 @@
+name: "Dependabot auto-merge"
+
+# ===========================================================================
+#  Aprueba y fusiona solas las actualizaciones de parche y menores que abre
+#  Dependabot. Las versiones mayores se quedan esperando revision manual.
+#
+#  DOS CONDICIONES para que esto funcione de verdad, y ninguna vive en este
+#  archivo (las dos son ajustes del repositorio):
+#    1. "Allow auto-merge" activado en Settings > General.
+#       Sin eso, `gh pr merge --auto` falla con "Auto-merge is not allowed".
+#    2. "Allow GitHub Actions to create and approve pull requests" activado
+#       en Settings > Actions > General.
+#       Sin eso, `gh pr review --approve` se rechaza.
+#
+#  OJO: este repositorio no tiene todavia un workflow de tests, asi que el
+#  auto-merge no espera ninguna comprobacion antes de fusionar. Anadir un
+#  workflow de CI es lo que le pondria un freno real.
+# ===========================================================================
+
+on:
+  pull_request:
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  auto-merge:
+    # Solo actua sobre pull requests que haya abierto Dependabot.
+    if: github.actor == 'dependabot[bot]'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Leer metadatos del PR de Dependabot
+        id: metadata
+        uses: dependabot/fetch-metadata@v2
+        with:
+          github-token: "${{ secrets.GITHUB_TOKEN }}"
+
+      - name: Auto-aprobar y activar auto-merge (squash)
+        # Todo menos los "major". Las actions se fusionan siempre: son
+        # nuestras y sus versiones mayores casi nunca rompen nada.
+        if: |
+          steps.metadata.outputs.update-type != 'version-update:semver-major' ||
+          steps.metadata.outputs.package-ecosystem == 'github_actions'
+        run: |
+          gh pr review --approve "$PR_URL"
+          gh pr merge --squash --auto "$PR_URL"
+        env:
+          PR_URL: ${{ github.event.pull_request.html_url }}
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
