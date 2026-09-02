@@ -1,0 +1,82 @@
+name: CI
+
+# ===========================================================================
+#  CI minimo: lo justo para que el auto-merge de Dependabot tenga un freno.
+#
+#  POR QUE EXISTE: este repositorio genera informes que se entregan a un
+#  cliente, y las dependencias se actualizan solas. Ya paso una vez: una
+#  subida de pandas cambio el tipo que devuelve read_csv y los valores vacios
+#  empezaron a imprimirse como el texto "nan" dentro del informe. Nadie lo vio
+#  hasta despues de entregarlo.
+#
+#  Sin CI, `dependabot-auto-merge.yml` fusiona los parches sin que nada
+#  compruebe nada. Con esto, un cambio de comportamiento en pandas rompe la
+#  build y el auto-merge se detiene.
+#
+#  La matriz de pandas 2 y 3 no es un adorno: requirements.txt declara
+#  `pandas>=2.0,<4`, asi que ambas versiones son instalaciones legitimas del
+#  proyecto y las dos tienen que funcionar.
+#
+#  NO se instalan PyQt6 ni PyQt6-WebEngine: son enormes, necesitan pantalla y
+#  solo hacen falta para exportar a PDF. informe_crem.py los importa dentro de
+#  convertir_html_a_pdf(), no al cargar el modulo, asi que las pruebas corren
+#  sin ellos.
+# ===========================================================================
+
+on:
+  push:
+    branches: ["main"]
+  pull_request:
+  workflow_dispatch: {}
+
+permissions:
+  contents: read
+
+jobs:
+  sintaxis:
+    name: Sintaxis
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.12"
+
+      # Sin dependencias: solo comprueba que todo el Python del repositorio
+      # compila. Barato y atrapa el error mas tonto y mas frecuente.
+      - name: Compilar todos los modulos
+        run: python -m compileall -q . -x '\.git'
+
+  pruebas:
+    name: Pruebas (pandas ${{ matrix.pandas }})
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - pandas: "2"
+            spec: "pandas>=2.0,<3"
+          - pandas: "3"
+            spec: "pandas>=3.0,<4"
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.12"
+
+      - name: Instalar dependencias
+        run: |
+          python -m pip install --upgrade pip
+          # Las mismas que informe_crem.py importa al cargarse. Se instalan
+          # antes a proposito: el bloque AUTO-INSTALL del modulo llama a pip
+          # si falta alguna, y en CI eso enmascararia un requirements roto.
+          python -m pip install "${{ matrix.spec }}" \
+                                "python-docx>=1.0" "lxml>=4.9" "rich>=13.0" "openpyxl>=3.1"
+
+      - name: Version de pandas realmente instalada
+        run: python -c "import pandas; print(pandas.__version__)"
+
+      - name: Ejecutar las pruebas
+        run: python -m unittest discover -s tests -v
