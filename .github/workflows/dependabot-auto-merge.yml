@@ -26,8 +26,10 @@ permissions:
 
 jobs:
   auto-merge:
-    # Solo actua sobre pull requests que haya abierto Dependabot.
-    if: github.actor == 'dependabot[bot]'
+    # Quien ABRIO el pull request, no quien disparo el evento: con
+    # github.actor, reabrir o tocar a mano un PR de Dependabot hacia
+    # que este job se saltara, porque el actor pasaba a ser la persona.
+    if: github.event.pull_request.user.login == 'dependabot[bot]'
     runs-on: ubuntu-latest
     steps:
       - name: Leer metadatos del PR de Dependabot
