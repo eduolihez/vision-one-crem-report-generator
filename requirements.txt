@@ -27,5 +27,5 @@ flask>=3.1.3
 # ── Interfaz de escritorio y exportación a PDF ────────────────────────────────
 # PyQt6-WebEngine es lo que convierte el HTML ejecutivo en PDF. Sin él, el
 # informe ejecutivo se genera igual pero solo queda en HTML.
-PyQt6>=6.5
+PyQt6>=6.11.0
 PyQt6-WebEngine>=6.5
