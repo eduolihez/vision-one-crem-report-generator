@@ -14,7 +14,7 @@
 # ve en el entregable.
 
 # ── Núcleo ────────────────────────────────────────────────────────────────────
-pandas>=2.0,<4
+pandas>=3.0.5,<4
 python-docx>=1.0
 openpyxl>=3.1.5
 lxml>=4.9
