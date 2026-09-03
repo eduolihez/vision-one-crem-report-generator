@@ -4,6 +4,8 @@
 ![License](https://img.shields.io/badge/license-MIT-green)
 ![Status](https://img.shields.io/badge/status-uso%20interno%20real-orange)
 
+### **[Versión en Español](README.md)** · [English version](README.en.md)
+
 Genera el informe de seguridad mensual a partir de Trend Micro Vision One. Extrae, normaliza y presenta todos los eventos de seguridad del tenant en informes HTML interactivos y responsive, Word y PDF.
 
 Los datos pueden venir de dos sitios, y ambos funcionan igual de bien:
