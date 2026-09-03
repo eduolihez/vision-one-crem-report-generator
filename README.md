@@ -1,25 +1,25 @@
-# CREM — Cybersecurity Risk, Exposure & Management Review
+# CREM: Cybersecurity Risk, Exposure & Management Review
 
 ![Python](https://img.shields.io/badge/python-3.12%2B-blue)
 ![License](https://img.shields.io/badge/license-MIT-green)
 ![Status](https://img.shields.io/badge/status-uso%20interno%20real-orange)
 
-Sistema automatizado de generación de informes de seguridad mensual basado en **Trend Micro Vision One**. Extrae, normaliza y presenta todos los eventos de seguridad del tenant en informes HTML interactivos (responsive), Word y PDF.
+Genera el informe de seguridad mensual a partir de Trend Micro Vision One. Extrae, normaliza y presenta todos los eventos de seguridad del tenant en informes HTML interactivos y responsive, Word y PDF.
 
-Los datos pueden venir de **dos fuentes**, ambas soportadas:
+Los datos pueden venir de dos sitios, y ambos funcionan igual de bien:
 
-- **API de Vision One** — descarga automática (requiere API key con permisos de Reports)
-- **CSVs exportados a mano** desde el portal — se arrastran al dashboard y se renombran/normalizan solos
+- La API de Vision One, con descarga automática. Necesita una API key con permisos de Reports.
+- CSVs exportados a mano desde el portal. Se arrastran al dashboard y se renombran y normalizan solos.
 
-**De un vistazo:**
+De un vistazo:
 
-- 🔌 Cliente propio de la API Vision One (`trendai_api.py`, ~3.100 líneas, solo `urllib` de la stdlib) que cubre **32 endpoints** en 10 categorías, con auto-descubrimiento de módulos contratados y fallback automático cuando un módulo no está disponible.
-- 📊 Generador de informes (`informe_crem.py`, ~6.800 líneas) que produce **Word, HTML técnico, HTML ejecutivo y PDF** a partir de los mismos datos — diff de CVEs mes a mes, detección de activos reincidentes, tendencia histórica y un cálculo de riesgo propio (**Riesgo CREM**, 0–100).
-- 🛡️ Enriquecimiento automático de **cada CVE** contra NVD, CISA KEV y EPSS, con caché en disco para poder regenerar informes 100% offline.
-- 🖥️ Dashboard de escritorio (`crem_dashboard.py`, Flask + PyQt6) con generación de informes, histórico, gestión multi-cliente y subida de CSVs por arrastrar-y-soltar.
-- 🗂️ Multi-cliente desde el primer día: cada empresa tiene su propia configuración, inventario de activos, SLAs e histórico, aislados entre sí.
+- Cliente propio de la API Vision One (`trendai_api.py`, ~3.100 líneas, solo `urllib` de la stdlib) que cubre 32 endpoints en 10 categorías, con auto-descubrimiento de los módulos contratados y fallback automático cuando un módulo no está disponible.
+- Generador de informes (`informe_crem.py`, ~6.800 líneas) que produce Word, HTML técnico, HTML ejecutivo y PDF a partir de los mismos datos: diff de CVEs mes a mes, detección de activos reincidentes, tendencia histórica y un cálculo de riesgo propio, el Riesgo CREM (0 a 100).
+- Enriquecimiento automático de cada CVE contra NVD, CISA KEV y EPSS, con caché en disco para poder regenerar informes 100% offline.
+- Dashboard de escritorio (`crem_dashboard.py`, Flask + PyQt6) con generación de informes, histórico, gestión multi-cliente y subida de CSVs arrastrando y soltando.
+- Multi-cliente desde el primer día: cada empresa tiene su propia configuración, inventario de activos, SLAs e histórico, aislados entre sí.
 
-Es una herramienta que uso en producción para generar informes mensuales reales de clientes — no es una demo ni un prototipo. Este repositorio es una versión sanitizada: nombres de cliente, inventarios de infraestructura real y credenciales se han sustituido por ejemplos genéricos antes de publicarla (ver [Aviso](#aviso) al final).
+Es una herramienta que uso en producción para generar informes mensuales reales de clientes. No es una demo ni un prototipo. Este repositorio es una versión sanitizada: nombres de cliente, inventarios de infraestructura real y credenciales se han sustituido por ejemplos genéricos antes de publicarla (ver [Aviso](#aviso) al final).
 
 ---
 
@@ -29,17 +29,17 @@ Es una herramienta que uso en producción para generar informes mensuales reales
 2. [Estructura de carpetas](#2-estructura-de-carpetas)
 3. [Puesta en marcha rápida](#3-puesta-en-marcha-rápida)
 4. [Configuración inicial](#4-configuración-inicial)
-5. [`main.py` — punto de entrada único](#5-mainpy--punto-de-entrada-único)
+5. [`main.py`, punto de entrada único](#5-mainpy-punto-de-entrada-único)
 6. [Fuentes de datos: API vs. CSVs manuales](#6-fuentes-de-datos-api-vs-csvs-manuales)
 7. [Referencia de configuraciones (`config.json`)](#7-referencia-de-configuraciones-configjson)
 8. [Flags de línea de comandos de cada script](#8-flags-de-línea-de-comandos-de-cada-script)
 9. [Módulos del sistema](#9-módulos-del-sistema)
-10. [API Vision One — Endpoints cubiertos](#10-api-vision-one--endpoints-cubiertos)
+10. [Endpoints cubiertos de la API Vision One](#10-endpoints-cubiertos-de-la-api-vision-one)
 11. [CSVs y archivado histórico](#11-csvs-y-archivado-histórico)
 12. [Enriquecimiento de CVEs (NVD · KEV · EPSS)](#12-enriquecimiento-de-cves-nvd--kev--epss)
 13. [Archivos que genera el informe](#13-archivos-que-genera-el-informe)
 14. [Informe HTML](#14-informe-html)
-15. [Riesgo CREM — cálculo automático vs. manual](#15-riesgo-crem--cálculo-automático-vs-manual)
+15. [Riesgo CREM: cálculo automático vs. manual](#15-riesgo-crem-cálculo-automático-vs-manual)
 16. [Dashboard de escritorio (`crem_dashboard.py`)](#16-dashboard-de-escritorio-crem_dashboardpy)
 17. [Test de API (`herramientas/test_api.py`)](#17-test-de-api-herramientastest_apipy)
 18. [Solución de problemas](#18-solución-de-problemas)
@@ -56,7 +56,7 @@ Es una herramienta que uso en producción para generar informes mensuales reales
 Python 3.12+
 ```
 
-> Los f-strings del generador de HTML usan sintaxis (PEP 701) que solo el parser de Python 3.12+ acepta — en 3.10/3.11 `informe_crem.py` falla al importar con un `SyntaxError`.
+> Los f-strings del generador de HTML usan sintaxis (PEP 701) que solo acepta el parser de Python 3.12+. En 3.10 y 3.11, `informe_crem.py` falla al importar con un `SyntaxError`.
 
 Todas las dependencias están en `requirements.txt`:
 
@@ -75,7 +75,7 @@ pip install -r requirements.txt
 | `PyQt6` + `PyQt6-WebEngine` | Ventana nativa de escritorio del dashboard (recomendado en Windows) |
 | `pywebview` *(opcional, comentado en requirements.txt)* | Alternativa ligera a PyQt6 si no quieres instalarlo |
 
-No se requieren librerías de terceros para la extracción de la API ni para el enriquecimiento de CVEs — `trendai_api.py` y `cve_enrich.py` usan únicamente `urllib` de la stdlib. Tanto `informe_crem.py` como `trendai_api.py` auto-instalan sus dependencias mínimas al arrancar si detectan que faltan.
+Ni la extracción de la API ni el enriquecimiento de CVEs necesitan librerías de terceros: `trendai_api.py` y `cve_enrich.py` usan únicamente `urllib` de la stdlib. Tanto `informe_crem.py` como `trendai_api.py` auto-instalan sus dependencias mínimas al arrancar si detectan que faltan.
 
 ---
 
@@ -131,13 +131,13 @@ python main.py            # → opción 1 (Dashboard)
 
 En el dashboard:
 
-1. **Empresa** → selecciona el cliente (o créalo escribiendo el nombre y pulsando *Crear*).
-2. **Fuente de datos** →
+1. Empresa: selecciona el cliente, o créalo escribiendo el nombre y pulsando *Crear*.
+2. Fuente de datos:
    - *API Vision One*: configura antes la key en **Conexión API**.
-   - *CSVs descargados*: ve a **Estado CSVs**, elige la empresa y arrastra los CSV exportados del portal — se renombran y normalizan solos.
-3. **Plantilla** → `Ambas` (técnica + ejecutiva).
-4. **Período** → mes del informe.
-5. **Generar informe** → los archivos aparecen en `CLIENTES/[EMPRESA]/INFORMES/Mes_Año/`.
+   - *CSVs descargados*: ve a **Estado CSVs**, elige la empresa y arrastra los CSV exportados del portal. Se renombran y normalizan solos.
+3. Plantilla: `Ambas` (técnica y ejecutiva).
+4. Período: mes del informe.
+5. Generar informe. Los archivos aparecen en `CLIENTES/[EMPRESA]/INFORMES/Mes_Año/`.
 
 ---
 
@@ -151,14 +151,14 @@ En el dashboard:
    - `Can be assigned to API keys` = **Yes**
    - Permisos: `Dashboards & Reports → Reports → Configure and download + View`
      (cubre attack-surface devices, vulnerable devices, high-risk devices, IPs públicas y asset groups)
-   - Añade también `Third-party auditing (API only)` — necesario para el endpoint `securityPosture`
+   - Añade también `Third-party auditing (API only)`, necesario para el endpoint `securityPosture`
    - `Data and app assets`: define el scope de activos necesario
 2. `Administration` → `API Keys` → crea la clave con ese rol y comprueba que el toggle **Status** esté activado
 3. Copia el token (solo visible una vez)
 
-> El rol **Operator** *no* incluye permiso de Reports y devuelve 403 en los módulos CREM. Si prefieres no crear rol, `Master Administrator` da cobertura total.
+> El rol **Operator** *no* incluye permiso de Reports y devuelve 403 en los módulos CREM. Si prefieres no crear un rol, `Master Administrator` da cobertura total.
 
-**Permisos mínimos por módulo:**
+Permisos mínimos por módulo:
 
 | Módulo Vision One | Permiso API Key |
 |---|---|
@@ -185,7 +185,7 @@ TRENDAI_REGION=EU                  # EU | US | AU | IN | SG | JP
 TRENDAI_DISCOVERED_BY_FILTER=      # (opcional) filtro TMV1 para acotar el origen de datos
 ```
 
-**Regiones disponibles:**
+Regiones disponibles:
 
 | Código | Servidor | Ubicación |
 |--------|----------|-----------|
@@ -198,7 +198,7 @@ TRENDAI_DISCOVERED_BY_FILTER=      # (opcional) filtro TMV1 para acotar el orige
 
 ### 4.3 `.env` global del proyecto (opcional)
 
-El `.env` de la raíz sirve para valores comunes a todos los clientes — hoy en día, la clave de NVD:
+El `.env` de la raíz sirve para valores comunes a todos los clientes. Hoy por hoy, solo la clave de NVD:
 
 ```bash
 NVD_API_KEY=xxxxxxxx-xxxx-...   # gratuita, sube el rate-limit de 5 a 50 req/30s
@@ -208,7 +208,7 @@ Ver [sección 12](#12-enriquecimiento-de-cves-nvd--kev--epss).
 
 ### 4.4 Crear el `config.json`
 
-Se crea automáticamente con valores por defecto la primera vez que se ejecuta `informe_crem.py` sobre una empresa nueva (o al pulsar *Crear* en el dashboard), pero puedes crearlo/editarlo a mano — ver el detalle completo en la [sección 7](#7-referencia-de-configuraciones-configjson).
+Se crea con valores por defecto la primera vez que se ejecuta `informe_crem.py` sobre una empresa nueva, o al pulsar *Crear* en el dashboard, pero puedes crearlo y editarlo a mano. El detalle completo está en la [sección 7](#7-referencia-de-configuraciones-configjson).
 
 ```json
 {
@@ -235,9 +235,9 @@ Se crea automáticamente con valores por defecto la primera vez que se ejecuta `
 
 ---
 
-## 5. `main.py` — punto de entrada único
+## 5. `main.py`, punto de entrada único
 
-`main.py` (v2.0) centraliza el acceso a la herramienta con un menú Rich en consola. Es la forma recomendada de arrancar; los scripts individuales siguen funcionando de forma independiente para uso avanzado/scripted (cron, CI, etc.).
+`main.py` (v2.0) centraliza el acceso a la herramienta con un menú Rich en consola. Es la forma recomendada de arrancar, aunque los scripts individuales siguen funcionando por su cuenta para uso avanzado o desde un script (cron, CI y demás).
 
 ```bash
 python main.py
@@ -252,8 +252,8 @@ python main.py
   0      Salir
 ```
 
-- **Dashboard** (opción por defecto, Enter) — interfaz gráfica completa; ver [sección 16](#16-dashboard-de-escritorio-crem_dashboardpy).
-- **Versión Terminal** — lanza `informe_crem.py` en modo interactivo: pregunta período, empresa, alertas XDR manuales y Riesgo CREM por consola.
+- Dashboard, la opción por defecto con Enter: interfaz gráfica completa, descrita en la [sección 16](#16-dashboard-de-escritorio-crem_dashboardpy).
+- Versión Terminal: lanza `informe_crem.py` en modo interactivo, preguntando por consola el período, la empresa, las alertas XDR manuales y el Riesgo CREM.
 
 Atajos para saltarse el menú:
 
@@ -272,16 +272,16 @@ El generador no depende de la API: funciona igual de bien con los CSV exportados
 
 Descarga los datos del mes con `trendai_api.py` y los deja en `CLIENTES/[empresa]/CSV/` justo antes de generar. Requiere `.env` con API key ([sección 4](#4-configuración-inicial)).
 
-### 6.2 Fuente *CSVs descargados* — exportación manual desde el portal
+### 6.2 Fuente *CSVs descargados*: exportación manual desde el portal
 
 En el portal del cliente: **Cyber Risk Exposure Management → Continuous Risk Management → Threat and Exposure Management**. Para cada módulo:
 
 1. Fija `Status` = **NEW** (viene así por defecto) y `Event Risk Level` = **ALL**
 2. Pulsa **Export** (lateral derecho) y espera a que termine la descarga
 
-En **Vulnerabilities** no hay `Event Risk Level` sino `Group By` — de ahí se descargan **dos** CSV: uno con `Group By = CVE Event` y otro con `Group By = Asset`.
+En **Vulnerabilities** no hay `Event Risk Level` sino `Group By`, así que de ahí se descargan dos CSV: uno con `Group By = CVE Event` y otro con `Group By = Asset`.
 
-**Mapeo de exportaciones a nombre estándar:**
+Mapeo de exportaciones a nombre estándar:
 
 | # | Módulo del portal | Filtro | Nombre estándar |
 |---|---|---|---|
@@ -291,25 +291,25 @@ En **Vulnerabilities** no hay `Event Risk Level` sino `Group By` — de ahí se 
 | 4 | Anomaly Detections | ALL | `anomaly-detections.csv` |
 | 5 | Cloud App Activity Risk Events | ALL | `cloud-app.csv` |
 | 6 | System Configuration Risk Events | ALL | `sys-conf.csv` |
-| 7 | *XDR* | — | **No se puede exportar** — se introduce a mano en el paso interactivo |
+| 7 | *XDR* | - | No se puede exportar; se introduce a mano en el paso interactivo |
 | 8 | Threat Detections | ALL | `threat-detections.csv` |
 | 9 | Security Configuration Risk Events | ALL | `security-conf.csv` |
 | 10 | Predictive Analytics | ALL | `predictive-analytics.csv` *(opcional)* |
 
-**No hace falta renombrarlos a mano.** Al subirlos por el dashboard (**Estado CSVs** → zona de arrastrar), `normalizar_csvs()` detecta el tipo por el nombre en bruto (`Account Compromise Indicators_20260723095557.csv`) y, cuando el nombre no basta —los dos CSV de vulnerabilidades se llaman igual—, por las cabeceras del archivo:
+No hace falta renombrarlos a mano. Al subirlos por el dashboard (**Estado CSVs**, zona de arrastrar), `normalizar_csvs()` detecta el tipo por el nombre en bruto (`Account Compromise Indicators_20260723095557.csv`). Cuando el nombre no basta, porque los dos CSV de vulnerabilidades se llaman igual, lo detecta por las cabeceras del archivo:
 
 - cabecera con `Vulnerability ID` / `CVE impact score` → `cve-events.csv`
 - cabecera con `Device name` / `Total CVEs` → `cve-assets.csv`
 
 Si subes dos veces el mismo tipo, gana el archivo más reciente. Después de subirlos, revisa la lista de **Estado CSVs**: los 8 requeridos deben aparecer con badge `OK`.
 
-> Si un módulo no tiene datos ese mes o el portal no deja exportarlo, copia el CSV vacío equivalente desde `plantilla/plantilla csv sin datos/` a la carpeta `CSV/` de la empresa — tiene las cabeceras correctas y el informe simplemente mostrará esa sección a cero.
+> Si un módulo no tiene datos ese mes, o el portal no deja exportarlo, copia el CSV vacío equivalente desde `plantilla/plantilla csv sin datos/` a la carpeta `CSV/` de la empresa. Tiene las cabeceras correctas y el informe mostrará esa sección a cero.
 
 ---
 
 ## 7. Referencia de configuraciones (`config.json`)
 
-Archivo por empresa en `CLIENTES/[empresa]/config.json`. Todas las claves son opcionales — si faltan se usan los valores por defecto indicados. Editable desde el dashboard (**Empresa**, **Inventario activos**, **SLAs y módulos**).
+Archivo por empresa en `CLIENTES/[empresa]/config.json`. Todas las claves son opcionales: si faltan se usan los valores por defecto indicados. Se puede editar desde el dashboard, en **Empresa**, **Inventario activos** y **SLAs y módulos**.
 
 | Clave | Tipo | Por defecto | Efecto |
 |---|---|---|---|
@@ -322,16 +322,16 @@ Archivo por empresa en `CLIENTES/[empresa]/config.json`. Todas las claves son op
 | `notas_adicionales` | string | `""` | Texto libre incluido en el informe ejecutivo |
 | `abrir_html_al_terminar` | bool | `false` | Si es `true`, abre automáticamente el HTML generado al finalizar |
 | `modulos_ignorar` | list[string] | `[]` | Reservado para excluir módulos del informe (campo de esquema; no filtra activamente todavía) |
-| `nvd_api_key` | string | `""` | Clave NVD por empresa (compatibilidad — se prefiere el `.env`) |
-| `inventario_activos` | dict | `{}` | Mapa `{nombre_o_patrón: {descripcion, criticidad}}` — ver detalle abajo |
+| `nvd_api_key` | string | `""` | Clave NVD por empresa, por compatibilidad; es preferible el `.env` |
+| `inventario_activos` | dict | `{}` | Mapa `{nombre_o_patrón: {descripcion, criticidad}}`, con el detalle abajo |
 
 ### `inventario_activos`
 
-Cada clave es un nombre (o fragmento de nombre — el match es por subcadena, insensible a mayúsculas) de dispositivo/activo tal como aparece en los CSVs de Vision One (`Device name`, `Asset`, etc.). El valor es:
+Cada clave es un nombre de dispositivo o activo, o un fragmento de nombre, ya que el match es por subcadena e insensible a mayúsculas, tal como aparece en los CSVs de Vision One (`Device name`, `Asset`, etc.). El valor es:
 
 ```json
 "NombreOFragmento": {
-  "descripcion": "Texto libre — para qué sirve el activo",
+  "descripcion": "Texto libre: para qué sirve el activo",
   "criticidad": "MUY CRITICO"
 }
 ```
@@ -343,9 +343,9 @@ Cada clave es un nombre (o fragmento de nombre — el match es por subcadena, in
 | `MUY CRITICO` | 💀 | Activo de máximo impacto para el negocio (ERP, BBDD producción, controladores de dominio…) |
 | `CRITICO` | 🔴 | Activo importante pero no de máximo impacto |
 | `NO CRITICO` | 🟢 | Activo de bajo impacto (PCs de usuario, equipos de pruebas…) |
-| `""` (vacío) o clave ausente | ⬜ | Sin catalogar — se muestra explícitamente como tal en el informe |
+| `""` (vacío) o clave ausente | ⬜ | Sin catalogar; se muestra explícitamente como tal en el informe |
 
-Este inventario alimenta tanto los badges de criticidad en las tablas como el **ranking de Vista CREM** y la **fila-resumen de exposición por criticidad** (ver secciones 14 y 15).
+Este inventario alimenta los badges de criticidad de las tablas, el ranking de Vista CREM y la fila-resumen de exposición por criticidad (secciones 14 y 15).
 
 ---
 
@@ -363,10 +363,10 @@ python informe_crem.py [opciones]
 |---|---|---|
 | `--mes "MES_ANO"` | string | Período del informe, ej. `"Mayo 2026"`. Si se omite, pregunta por consola (o usa el mes anterior con `--no-input`) |
 | `--empresa NOMBRE` | string | Nombre de la carpeta de empresa en `CLIENTES/`. Si se omite, muestra un menú de selección |
-| `--template {tecnico,ejecutivo,ambos}` | choice | Tipo de informe. `tecnico` = Word + HTML completo; `ejecutivo` = HTML ligero; **por defecto `ambos`** |
+| `--template {tecnico,ejecutivo,ambos}` | choice | Tipo de informe. `tecnico` = Word + HTML completo; `ejecutivo` = HTML ligero; por defecto, `ambos` |
 | `--no-input` | flag | Modo no interactivo (cron/scheduler, y lo que usa el dashboard). Omite todos los prompts |
-| `--riesgo-crem SCORE` | float | Fija manualmente el **Riesgo CREM** (0-100, admite decimales) en vez del calculado — ver [sección 15](#15-riesgo-crem--cálculo-automático-vs-manual) |
-| `--api-riesgo` | flag | Consulta el **Cyber Risk Index** real a la API de Vision One y lo usa como Riesgo CREM |
+| `--riesgo-crem SCORE` | float | Fija manualmente el Riesgo CREM (0-100, admite decimales) en vez del calculado; ver [sección 15](#15-riesgo-crem-cálculo-automático-vs-manual) |
+| `--api-riesgo` | flag | Consulta el Cyber Risk Index real a la API de Vision One y lo usa como Riesgo CREM |
 | `--solo-word` | flag | Regenera Word/HTML reutilizando la caché `.pkl` sin releer los CSVs (rápido para iterar sobre plantilla/estilos) |
 | `--excels` | flag | Genera además un Excel de revisión por módulo |
 | `--conservar-csv` | flag | Copia los CSV al histórico en vez de moverlos (la carpeta `CSV/` no se vacía) |
@@ -417,47 +417,47 @@ python herramientas/test_api.py [opciones]
 
 ## 9. Módulos del sistema
 
-### `trendai_api.py` — Cliente API
+### `trendai_api.py`, el cliente de la API
 
-- **Descubrimiento automático de módulos**: detecta qué módulos tiene contratados el cliente (paralelo, 6 workers)
-- **Extracción máxima**: múltiples fuentes de datos con estrategias de fallback
-- **Normalización**: transforma respuestas crudas de API en filas de CSV homogéneas
-- **Deduplicación**: por ID de alerta/CVE/activo
-- **Guardado**: CSVs + `.api_meta.json` con estadísticas de la extracción
+- Descubre automáticamente qué módulos tiene contratados el cliente, en paralelo con 6 workers.
+- Tira de varias fuentes de datos, con estrategias de fallback, para extraer todo lo posible.
+- Normaliza las respuestas crudas de la API en filas de CSV homogéneas.
+- Deduplica por ID de alerta, CVE o activo.
+- Guarda los CSVs y un `.api_meta.json` con estadísticas de la extracción.
 
-### `informe_crem.py` — Generador de informes (v4.0)
+### `informe_crem.py`, el generador de informes (v4.0)
 
 - Lee los CSVs de `CLIENTES/[empresa]/CSV/` (normalizando antes los nombres en bruto)
-- **Enriquece todos los CVEs** con NVD + CISA KEV + EPSS ([sección 12](#12-enriquecimiento-de-cves-nvd--kev--epss))
-- Calcula el **Riesgo CREM** (0–100), con opción de override manual o vía API ([sección 15](#15-riesgo-crem--cálculo-automático-vs-manual))
-- Identifica **TOP 3 incidentes críticos** (Acciones Prioritarias)
-- Construye los **5 paneles de Vista CREM** (Devices, Internet, Accounts, Applications, Cloud), rankeados por score + criticidad de inventario
-- Calcula **diff de CVEs** (nuevos / resueltos / persistentes vs. mes anterior)
-- Detecta **CVEs reincidentes** (sin resolver N meses, según `meses_reincidente`)
-- Calcula **tendencia histórica** leyendo los meses archivados
-- Genera **HTML técnico y/o ejecutivo**, **Word** y **PDF**
-- **Archiva automáticamente** los CSV del mes en el histórico de la empresa ([sección 11](#11-csvs-y-archivado-histórico))
+- Enriquece todos los CVEs con NVD, CISA KEV y EPSS ([sección 12](#12-enriquecimiento-de-cves-nvd--kev--epss))
+- Calcula el Riesgo CREM (0 a 100), con opción de override manual o vía API ([sección 15](#15-riesgo-crem-cálculo-automático-vs-manual))
+- Identifica el TOP 3 de incidentes críticos, las Acciones Prioritarias
+- Construye los 5 paneles de Vista CREM (Devices, Internet, Accounts, Applications, Cloud), rankeados por score y criticidad de inventario
+- Calcula el diff de CVEs: nuevos, resueltos y persistentes frente al mes anterior
+- Detecta CVEs reincidentes, sin resolver durante N meses según `meses_reincidente`
+- Calcula la tendencia histórica leyendo los meses archivados
+- Genera HTML técnico y ejecutivo, Word y PDF
+- Archiva los CSV del mes en el histórico de la empresa ([sección 11](#11-csvs-y-archivado-histórico))
 
-### `cve_enrich.py` — Enriquecimiento de CVEs
+### `cve_enrich.py`, el enriquecimiento de CVEs
 
 Consulta NVD 2.0, CISA KEV y EPSS con caché a disco. Ver [sección 12](#12-enriquecimiento-de-cves-nvd--kev--epss).
 
-### `crem_dashboard.py` — Dashboard de escritorio (v4.1)
+### `crem_dashboard.py`, el dashboard de escritorio (v4.1)
 
-Interfaz Flask servida en un puerto local libre, mostrada en una **ventana nativa** — ver [sección 16](#16-dashboard-de-escritorio-crem_dashboardpy).
+Interfaz Flask servida en un puerto local libre y mostrada en una ventana nativa. Ver la [sección 16](#16-dashboard-de-escritorio-crem_dashboardpy).
 
-### `herramientas/test_api.py` — Test de API
+### `herramientas/test_api.py`, el test de API
 
-Diagnostica la conectividad y cobertura de datos de la API key, diferenciando:
-- `[OK]` — módulo accesible con datos
-- `[403]` — módulo existe pero la API key no tiene permiso
-- `[404]` — módulo no contratado en el tenant
+Diagnostica la conectividad y la cobertura de datos de la API key, diferenciando:
+- `[OK]`: módulo accesible y con datos
+- `[403]`: el módulo existe, pero la API key no tiene permiso
+- `[404]`: módulo no contratado en el tenant
 
 ---
 
-## 10. API Vision One — Endpoints cubiertos
+## 10. Endpoints cubiertos de la API Vision One
 
-El sistema cubre **32 endpoints** organizados en 10 categorías:
+El sistema cubre 32 endpoints organizados en 10 categorías:
 
 ### Core XDR
 | Endpoint | Descripción | CSV destino |
@@ -476,7 +476,7 @@ El sistema cubre **32 endpoints** organizados en 10 categorías:
 | `GET /v3.0/endpointSecurity/tasks` | Tareas pendientes en endpoints | sys-conf |
 | `GET /v3.0/endpointSecurity/isolatedEndpoints` | Endpoints actualmente en cuarentena | sys-conf |
 
-### CREM / ASRM — Attack Surface Risk Management
+### CREM / ASRM (Attack Surface Risk Management)
 | Endpoint | Descripción | CSV destino |
 |----------|-------------|-------------|
 | `GET /v3.0/asrm/vulnerableDevices` | Todos los CVEs activos (`cveDetectionStatus=any` obligatorio) | cve-events / cve-assets |
@@ -541,11 +541,11 @@ Vengan de la API o de una exportación manual, todos se guardan en `CLIENTES/[em
 | `anomaly-detections.csv` | Comportamientos anómalos detectados por ML | Risk event, Asset, Event risk level | ✔ |
 | `account-compromise.csv` | Cuentas comprometidas o en riesgo | Risk event, Impact scope, Event risk level | ✔ |
 | `cve-events.csv` | CVEs individuales con CVSS score y exploit | Vulnerability ID, CVE impact score, Global exploit potential | ✔ |
-| `cve-assets.csv` | Activos con CVEs — resumen por dispositivo | Device name, CVE event risk score, Total CVEs | ✔ |
+| `cve-assets.csv` | Activos con CVEs, resumidos por dispositivo | Device name, CVE event risk score, Total CVEs | ✔ |
 | `security-conf.csv` | Problemas de configuración de seguridad | Risk event, Asset, Event risk level | ✔ |
 | `sys-conf.csv` | Problemas de sistema, IOCs, audit, agentes, cloud posture | Risk event, Asset, Event risk level | ✔ |
 | `cloud-app.csv` | Eventos de apps cloud en riesgo | Risk event, Asset, Event risk level, Detail info | ✔ |
-| `predictive-analytics.csv` | Rutas de ataque simuladas (ASM) | Entry assets, Target assets, Attack path risk score | — |
+| `predictive-analytics.csv` | Rutas de ataque simuladas (ASM) | Entry assets, Target assets, Attack path risk score | - |
 
 ### `.api_meta.json`
 
@@ -570,28 +570,28 @@ Solo se genera en extracciones por API:
 
 ### Archivado automático al histórico
 
-Al terminar de generar el informe, `informe_crem.py` **mueve** los CSV (y el `.api_meta.json`) de `CLIENTES/[empresa]/CSV/` a `CLIENTES/[empresa]/INFORMES/CSV/csv-{mes}-{año}/`, dejando `CSV/` vacía y lista para el mes siguiente. Es el comportamiento esperado: **no es un error que la carpeta `CSV/` quede vacía después de generar.**
+Al terminar de generar el informe, `informe_crem.py` mueve los CSV, y el `.api_meta.json`, de `CLIENTES/[empresa]/CSV/` a `CLIENTES/[empresa]/INFORMES/CSV/csv-{mes}-{año}/`, dejando `CSV/` vacía y lista para el mes siguiente. Es el comportamiento esperado: **que la carpeta `CSV/` quede vacía después de generar no es un error.**
 
 - Con `--conservar-csv` se copian en vez de moverse.
 - Con `--prueba` no se archiva nada.
-- Esa carpeta histórica es la que alimenta el **diff de CVEs**, la **tendencia mensual** y los **CVEs reincidentes** de los meses siguientes.
+- Esa carpeta histórica es la que alimenta el diff de CVEs, la tendencia mensual y los CVEs reincidentes de los meses siguientes.
 - Junto a los CSVs se guarda `risk_score.json` con el Riesgo CREM final del mes; si regeneras el mismo mes, los CSVs no se duplican pero el `risk_score.json` sí se actualiza.
 
 ---
 
 ## 12. Enriquecimiento de CVEs (NVD · KEV · EPSS)
 
-Cada CVE del informe se enriquece **siempre** (no hay que activar nada) con tres fuentes gratuitas:
+Cada CVE del informe se enriquece siempre, sin tener que activar nada, con tres fuentes gratuitas:
 
 | Fuente | Qué aporta |
 |---|---|
-| **NVD 2.0** (NIST) | Versión que corrige el fallo, CVSS, CWE, enlaces al parche → texto de *solución* en español |
-| **CISA KEV** | Si el CVE se está explotando activamente + fecha límite de remediación |
-| **EPSS** (FIRST.org) | Probabilidad de explotación en los próximos 30 días (0–1) |
+| NVD 2.0 (NIST) | Versión que corrige el fallo, CVSS, CWE, enlaces al parche; de ahí sale el texto de *solución* en español |
+| CISA KEV | Si el CVE se está explotando activamente, y la fecha límite de remediación |
+| EPSS (FIRST.org) | Probabilidad de explotación en los próximos 30 días, de 0 a 1 |
 
-- **Caché en `cve_cache/`**: los CVE no cambian, así que solo se descargan los que faltan. Con la caché caliente el informe se regenera **offline**.
-- **Rate-limit de NVD**: 5 peticiones/30 s sin clave (≈6,5 s por CVE nuevo) o 50/30 s con clave gratuita (≈0,7 s). Si el cliente tiene muchos CVEs nuevos, el primer informe puede tardar bastante — es normal.
-- La clave NVD se resuelve en este orden: variable de entorno `NVD_API_KEY` → `.env` global del proyecto → `.env` de la empresa → `nvd_api_key` en `config.json`.
+- Caché en `cve_cache/`: los CVE no cambian, así que solo se descargan los que faltan. Con la caché caliente, el informe se regenera offline.
+- Rate-limit de NVD: 5 peticiones cada 30 s sin clave (unos 6,5 s por CVE nuevo), o 50 cada 30 s con clave gratuita (unos 0,7 s). Si el cliente tiene muchos CVEs nuevos, el primer informe tarda bastante. Es normal.
+- La clave NVD se resuelve en este orden: variable de entorno `NVD_API_KEY`, `.env` global del proyecto, `.env` de la empresa y `nvd_api_key` en `config.json`.
 - El catálogo KEV se refresca cada 24 h en una sola descarga.
 
 ---
@@ -605,8 +605,8 @@ En `CLIENTES/[EMPRESA]/INFORMES/Mes_Año/` (o `PRUEBAS/Mes_Año/` con `--prueba`
 | `Revisión_CREM_Mes_Año.docx` | técnica / ambas | Informe Word a partir de `plantilla/Revisión_CREM_MES_AÑO.docx` |
 | `Revisión_CREM_Mes_Año.html` | técnica / ambas | Informe interactivo completo (tema oscuro) |
 | `Revisión_CREM_Mes_Año_ejecutivo.html` | ejecutiva / ambas | Informe ejecutivo (tema claro, lenguaje de negocio) |
-| `Revisión_CREM_Mes_Año*.pdf` | — | Conversión del HTML (botón *Exportar PDF* del histórico) |
-| `log_Mes_Año_AAAAMMDD_HHMMSS.txt` | siempre | Log de la ejecución — útil para diagnosticar |
+| `Revisión_CREM_Mes_Año*.pdf` | - | Conversión del HTML (botón *Exportar PDF* del histórico) |
+| `log_Mes_Año_AAAAMMDD_HHMMSS.txt` | siempre | Log de la ejecución, útil para diagnosticar |
 | `excels/*.xlsx` | con `--excels` | Un Excel de revisión por módulo |
 
 El HTML técnico es un único archivo autocontenido (los gráficos son SVG en línea), así que puede pesar decenas de MB pero se puede enviar tal cual al cliente.
@@ -615,28 +615,28 @@ El HTML técnico es un único archivo autocontenido (los gráficos son SVG en l�
 
 ## 14. Informe HTML
 
-El informe interactivo (plantillas `tecnico` y `ejecutivo`) es **responsive**: en escritorio muestra sidebar de navegación fija; en tablet/móvil (< 900px) el sidebar pasa a ser un panel deslizante (drawer) accesible con el botón ☰ de la cabecera, y las tablas anchas scrollean horizontalmente dentro de su propio contenedor sin romper el layout de la página.
+El informe interactivo (plantillas `tecnico` y `ejecutivo`) es responsive. En escritorio muestra una sidebar de navegación fija; en tablet y móvil, por debajo de 900px, la sidebar pasa a ser un panel deslizante accesible con el botón ☰ de la cabecera, y las tablas anchas scrollean horizontalmente dentro de su propio contenedor sin romper el layout de la página.
 
 ### Header
-- **Risk Gauge (Riesgo CREM)**: puntuación 0–100 (o el valor manual fijado, con 1 decimal si aplica) con nivel (Crítico / Alto / Medio / Bajo) y tendencia vs. mes anterior
+- Risk Gauge (Riesgo CREM): puntuación de 0 a 100, o el valor manual fijado con 1 decimal si aplica, con su nivel (Crítico, Alto, Medio o Bajo) y la tendencia frente al mes anterior
 - KPIs: total eventos, CVEs nuevos, CVEs resueltos, activos en riesgo, alertas XDR, CVEs reincidentes
 
 ### Vista CREM (5 dimensiones)
 
-Cada panel muestra el TOP 3 de activos/eventos de mayor riesgo de esa dimensión. Encima de los 5 paneles hay una **fila-resumen** con el número de activos con CVE Alto/Crítico agrupados por criticidad de inventario (💀 Muy Crítico · 🔴 Crítico · 🟢 No Crítico · ⬜ Sin catalogar), para tener contexto de exposición antes de entrar al detalle.
+Cada panel muestra el TOP 3 de activos o eventos de mayor riesgo de esa dimensión. Encima de los 5 paneles hay una fila-resumen con el número de activos con CVE Alto o Crítico, agrupados por criticidad de inventario (💀 Muy Crítico · 🔴 Crítico · 🟢 No Crítico · ⬜ Sin catalogar), para tener contexto de exposición antes de entrar al detalle.
 
 | Dimensión | TOP 3 muestra | Criterio de ranking |
 |-----------|---------------|---------------------|
-| Dispositivos | Activos con mayor CVE risk score | Score numérico + bonus por criticidad de inventario (Muy Crítico +15, Crítico +8) — el score mostrado es siempre el real, el bonus solo afecta el orden |
+| Dispositivos | Activos con mayor CVE risk score | Score numérico más un bonus por criticidad de inventario (Muy Crítico +15, Crítico +8). El score mostrado es siempre el real; el bonus solo afecta al orden |
 | Internet / Expuesto | Activos con IP pública o marcados como internet-facing | Igual que Dispositivos: score + bonus de criticidad |
 | Cuentas | Cuentas con riesgo más alto | Nivel de evento (Critical > High) |
 | Aplicaciones | OS/Apps con más CVEs críticos | Max CVSS score |
 | Cloud Assets | Apps cloud con mayor riesgo | Nivel de evento |
 
-Cada elemento de los paneles Dispositivos/Internet muestra su chip de criticidad — si el activo no está en el `inventario_activos` de `config.json`, se muestra explícitamente como **⬜ Sin catalogar** en vez de ocultarse.
+Cada elemento de los paneles Dispositivos e Internet muestra su chip de criticidad. Si el activo no está en el `inventario_activos` de `config.json`, aparece explícitamente como ⬜ Sin catalogar en vez de ocultarse.
 
 ### Resumen Ejecutivo
-- **Acciones Prioritarias**: TOP 3 incidentes Critical/High de Workbench con link directo al portal
+- Acciones Prioritarias: TOP 3 de incidentes Critical y High de Workbench, con link directo al portal
 - Diff de CVEs (nuevos / resueltos / persistentes vs. mes anterior)
 - Gráficos: distribución de severidad (donut) + eventos por módulo (barras)
 - Tabla de módulos con totales
@@ -653,14 +653,14 @@ CVE Eventos · CVE Activos · Config. Sistema · Config. Seguridad · Amenazas �
 
 ---
 
-## 15. Riesgo CREM — cálculo automático vs. manual
+## 15. Riesgo CREM: cálculo automático vs. manual
 
-El **Riesgo CREM** que se muestra en el pill de cabecera del informe técnico es, por defecto, una **heurística propia** (`calcular_risk_score`) calculada a partir de: CVEs críticos/altos, amenazas activas, cuentas comprometidas, activos reincidentes y problemas de configuración — **no** es el mismo cálculo que el "Cyber Risk Index / ASM Risk Score" que muestra el portal Vision One, por lo que puede no coincidir (por ejemplo, la heurística puede dar 17 mientras el portal muestra 36.2).
+El Riesgo CREM que se muestra en el pill de cabecera del informe técnico es, por defecto, una heurística propia (`calcular_risk_score`) calculada a partir de los CVEs críticos y altos, las amenazas activas, las cuentas comprometidas, los activos reincidentes y los problemas de configuración. No es el mismo cálculo que el "Cyber Risk Index / ASM Risk Score" del portal Vision One, así que puede no coincidir: la heurística puede dar 17 mientras el portal muestra 36.2.
 
 Tres formas de fijar el valor real:
 
-- **Automática desde la API** — `--api-riesgo` (es lo que usa el dashboard cuando dejas el campo manual vacío y hay API key): consulta el Cyber Risk Index real del tenant.
-- **Manual en consola**: si no usas `--no-input`, al generar el informe se te pregunta:
+- Automática desde la API, con `--api-riesgo`, que consulta el Cyber Risk Index real del tenant. Es lo que usa el dashboard cuando dejas el campo manual vacío y hay API key.
+- Manual en consola: si no usas `--no-input`, al generar el informe se te pregunta:
   ```
   Riesgo CREM
   Score calculado automáticamente: 17
@@ -668,7 +668,7 @@ Tres formas de fijar el valor real:
   Enter = mantener el valor automático.
   → 36.2
   ```
-- **Manual por flag / dashboard**: `--riesgo-crem 36.2`, o el campo numérico **Riesgo CREM manual** del dashboard (con el botón *Obtener de API* al lado, que lo rellena consultando Vision One).
+- Manual por flag o desde el dashboard: `--riesgo-crem 36.2`, o el campo numérico **Riesgo CREM manual** del dashboard, que tiene al lado un botón *Obtener de API* para rellenarlo consultando Vision One.
 
 El valor final se muestra con 1 decimal cuando no es entero y se persiste en `risk_score.json` dentro de la carpeta histórica del mes. Los meses siguientes usan ese valor real (en vez de una aproximación) para calcular la tendencia (`▲`/`▼`).
 
@@ -681,13 +681,13 @@ python crem_dashboard.py
 # o: python main.py --dashboard
 ```
 
-El dashboard **no** es un servidor web en un puerto fijo: al arrancar busca un puerto local libre, levanta Flask en un hilo en segundo plano y abre una **ventana nativa de escritorio** apuntando a ese servidor:
+El dashboard no es un servidor web en un puerto fijo. Al arrancar busca un puerto local libre, levanta Flask en un hilo en segundo plano y abre una ventana nativa de escritorio apuntando a ese servidor:
 
-1. **PyQt6 + PyQt6-WebEngine** (recomendado, mejor integración en Windows) — si está instalado
-2. Si no, intenta **pywebview** como alternativa más ligera
-3. Si ninguno está disponible, cae a abrir la URL en el **navegador del sistema**
+1. PyQt6 con PyQt6-WebEngine, si está instalado. Es lo recomendable, porque se integra mejor en Windows.
+2. Si no, intenta pywebview, que es más ligero.
+3. Si no hay ninguno de los dos, abre la URL en el navegador del sistema.
 
-**Pantallas (sidebar):**
+Pantallas de la sidebar:
 
 | Sección | Pantalla | Para qué sirve |
 |---|---|---|
@@ -700,10 +700,10 @@ El dashboard **no** es un servidor web en un puerto fijo: al arrancar busca un p
 | Diagnóstico | **Conexión API** | API key + región, probar conexión, ver módulos disponibles y lanzar la descarga de datos del mes |
 | Diagnóstico | **Acerca de** | Rutas del script y estructura de carpetas |
 
-**Botones de generación** (pie de página):
+Botones de generación, en el pie de página:
 
-- **Generar informe** — flujo normal: escribe en `INFORMES/`, archiva los CSVs y actualiza el histórico.
-- **Generar prueba** — pensado para escribir en `PRUEBAS/` sin tocar el histórico. ⚠️ Actualmente el dashboard **no** pasa el flag `--prueba` al subproceso, así que genera en `INFORMES/` y luego no encuentra los archivos donde los busca. Hasta que se corrija, para modo prueba usa la terminal: `python informe_crem.py --empresa X --mes "Junio 2026" --prueba`.
+- **Generar informe** es el flujo normal: escribe en `INFORMES/`, archiva los CSVs y actualiza el histórico.
+- **Generar prueba** debería escribir en `PRUEBAS/` sin tocar el histórico, pero ahora mismo el dashboard no pasa el flag `--prueba` al subproceso, así que genera en `INFORMES/` y luego no encuentra los archivos donde los busca. Hasta que se corrija, para el modo prueba usa la terminal: `python informe_crem.py --empresa X --mes "Junio 2026" --prueba`.
 
 ---
 
@@ -712,10 +712,10 @@ El dashboard **no** es un servidor web en un puerto fijo: al arrancar busca un p
 Diagnóstico completo de la API key y cobertura de datos:
 
 ```bash
-# Modo rápido — solo verifica conexión y descubre módulos (sin descargar datos)
+# Modo rápido: solo verifica conexión y descubre módulos (sin descargar datos)
 python herramientas/test_api.py --empresa ACME --quick
 
-# Modo completo — descarga muestra de cada módulo disponible
+# Modo completo: descarga una muestra de cada módulo disponible
 python herramientas/test_api.py --empresa ACME --mes "Junio 2026"
 
 # Guardar resultados en JSON
@@ -726,17 +726,17 @@ python herramientas/test_api.py --empresa ACME
 python herramientas/test_api.py --env /ruta/al/.env
 ```
 
-**Interpretación de resultados:**
+Interpretación de resultados:
 
 | Estado | Código | Significado |
 |--------|--------|-------------|
 | `[OK]` | 200 | Módulo accesible y con datos |
-| `[WARN]` | — | Accesible pero respuesta inesperada |
-| `[403]` | 403 | Módulo contratado — API key sin permiso |
+| `[WARN]` | - | Accesible pero respuesta inesperada |
+| `[403]` | 403 | Módulo contratado, pero la API key no tiene permiso |
 | `[404]` | 404 | Módulo no contratado en este tenant |
-| `[NET]` | 0 | Error de red — revisar región y conectividad |
+| `[NET]` | 0 | Error de red; revisar región y conectividad |
 
-> Si ves módulos con `[403]`: revisa el rol de la API key ([sección 4.1](#41-crear-la-api-key-en-vision-one)) — el permiso que falta casi siempre es `Dashboards & Reports → Reports`.
+> Si ves módulos con `[403]`, revisa el rol de la API key ([sección 4.1](#41-crear-la-api-key-en-vision-one)). El permiso que falta casi siempre es `Dashboards & Reports → Reports`.
 
 ---
 
@@ -751,7 +751,7 @@ python herramientas/test_api.py --env /ruta/al/.env
 - Edita el rol en **Administration → User Roles** y añade `Dashboards & Reports → Reports` + `Third-party auditing (API only)`
 
 ### "Sin conexión" (HTTP 0)
-- Verifica la región en `.env` — debe coincidir con el portal que usas
+- Verifica la región en `.env`, que debe coincidir con el portal que usas
 - Comprueba la conectividad de red desde el equipo
 
 ### CVEs en el portal pero `asm_vuln` como 404
@@ -759,18 +759,18 @@ python herramientas/test_api.py --env /ruta/al/.env
 - El sistema tiene fallback automático vía Search API para detectar CVEs sin módulo ASM
 
 ### La carpeta `CSV/` está vacía después de generar
-- Es lo normal: los CSVs se **mueven** al histórico ([sección 11](#11-csvs-y-archivado-histórico)). Están en `INFORMES/CSV/csv-mes-año/`
+- Es lo normal: los CSVs se mueven al histórico ([sección 11](#11-csvs-y-archivado-histórico)). Están en `INFORMES/CSV/csv-mes-año/`
 
 ### Subí los CSVs pero faltan / están mal clasificados
 - Mira **Estado CSVs**: dice exactamente cuáles faltan
-- Los dos CSV de vulnerabilidades se distinguen por sus cabeceras, no por el nombre — asegúrate de exportar uno con `Group By = CVE Event` y otro con `Group By = Asset`
+- Los dos CSV de vulnerabilidades se distinguen por sus cabeceras, no por el nombre, así que asegúrate de exportar uno con `Group By = CVE Event` y otro con `Group By = Asset`
 - Si un módulo no tiene datos, copia el CSV vacío de `plantilla/plantilla csv sin datos/`
 
 ### El informe tarda muchísimo la primera vez
 - Es el enriquecimiento de CVEs contra NVD ([sección 12](#12-enriquecimiento-de-cves-nvd--kev--epss)). Configura `NVD_API_KEY` en el `.env` global para ir ~9× más rápido; las siguientes ejecuciones tiran de caché
 
 ### El Riesgo CREM no coincide con el portal Vision One
-- Es esperado: la heurística interna y el Cyber Risk Index del portal son cálculos distintos — usa `--api-riesgo`, `--riesgo-crem`, el prompt interactivo o el campo del dashboard ([sección 15](#15-riesgo-crem--cálculo-automático-vs-manual))
+- Es esperado: la heurística interna y el Cyber Risk Index del portal son cálculos distintos. Usa `--api-riesgo`, `--riesgo-crem`, el prompt interactivo o el campo del dashboard ([sección 15](#15-riesgo-crem-cálculo-automático-vs-manual))
 
 ### Informe vacío o con pocos datos
 - Verifica que los CSVs existen en `CLIENTES/[empresa]/CSV/`
@@ -784,7 +784,7 @@ python herramientas/test_api.py --env /ruta/al/.env
 - Instala `PyQt6` y `PyQt6-WebEngine` (`pip install -r requirements.txt`); sin ellos cae automáticamente al navegador del sistema
 
 ### El informe salió, pero con cifras raras
-- Mira el final de la ejecución: si algo se generó incompleto aparece un bloque **AVISOS DE ESTA EJECUCIÓN** con qué falló y qué se perdió. Ese mismo aviso sale dentro del HTML, arriba del todo
+- Mira el final de la ejecución: si algo se generó incompleto, aparece un bloque **AVISOS DE ESTA EJECUCIÓN** con qué falló y qué se perdió. Ese mismo aviso sale dentro del HTML, arriba del todo
 - Comprueba el bloque **Procedencia de los CSV de entrada** del log: filas, tamaño, fecha y hash de cada CSV que entró. Si dos ejecuciones del mismo mes dan resultados distintos, ahí se ve si los datos eran los mismos
 - Si tienes una prueba de regresión propia con datos de cliente reales, ejecútala: si falla, el problema está en el código, no en los datos
 
@@ -796,8 +796,8 @@ python herramientas/test_api.py --env /ruta/al/.env
 
 En uso interno, este proyecto se apoya en una prueba de regresión
 (`tests/test_regresion.py`, no incluida aquí) que reproduce un mes real ya
-cerrado de un cliente sobre una **copia temporal** de sus CSV archivados
-—nunca toca `CLIENTES/`— y comprueba cifra a cifra el resultado: filas por
+cerrado de un cliente sobre una copia temporal de sus CSV archivados, sin tocar
+nunca `CLIENTES/`, y comprueba cifra a cifra el resultado: filas por
 módulo, diff de CVEs, comparativa mes a mes, resumen, reincidentes, orden de
 la tendencia y Riesgo CREM. Se ha omitido de esta versión pública porque sus
 cifras esperadas están calculadas sobre datos reales de cliente que no se
@@ -811,7 +811,7 @@ que nadie lo note.
 
 ### Añadir un módulo nuevo
 
-Todo módulo (CVE, amenazas, cloud apps…) se declara en **un solo sitio**:
+Todo módulo (CVE, amenazas, cloud apps y demás) se declara en un solo sitio:
 `MODULOS`, en `informe_crem.py`. Una entrada nueva ahí da de alta el módulo en
 la carga, el resumen, el gráfico de barras y la comparativa mensual. Nunca
 referencies un módulo por su etiqueta en castellano: usa su `id`.
@@ -835,25 +835,25 @@ informe del cliente.
 
 ## Notas técnicas
 
-- **Sin dependencias de API externas para generar**: con los CSVs ya en disco y la caché de CVEs caliente, el generador funciona 100% offline
-- **Caché histórica**: los CSVs de meses anteriores se archivan en `INFORMES/CSV/csv-mes-año/`, usados para tendencias, diff de CVEs y el Riesgo CREM histórico real
-- **Caché de ejecución**: `datos/*.pkl` permite regenerar Word/HTML sin releer los CSVs (`--solo-word`)
-- **Deduplicación**: las alertas Workbench se deduplican por ID para no contar la misma alerta dos veces aunque aparezca en múltiples estrategias de extracción
-- **Fallback automático**: si ASM no está disponible, el sistema busca CVEs vía Search API; si cloudAccess no está, busca eventos cloud en Workbench
-- **Rate limiting**: la extracción respeta el header `Retry-After` en respuestas 429 y reintenta con backoff exponencial para errores 5xx
-- **Seguridad**: los `.env` contienen credenciales — no subir a git ni compartir por email (ya cubierto por el `.gitignore` del repo)
+- Generar no depende de ninguna API externa: con los CSVs ya en disco y la caché de CVEs caliente, el generador funciona 100% offline.
+- Caché histórica: los CSVs de meses anteriores se archivan en `INFORMES/CSV/csv-mes-año/` y alimentan las tendencias, el diff de CVEs y el Riesgo CREM histórico real.
+- Caché de ejecución: `datos/*.pkl` permite regenerar Word y HTML sin releer los CSVs (`--solo-word`).
+- Deduplicación: las alertas Workbench se deduplican por ID, para no contar la misma alerta dos veces aunque aparezca en varias estrategias de extracción.
+- Fallback automático: si ASM no está disponible, el sistema busca CVEs vía Search API; si cloudAccess no está, busca eventos cloud en Workbench.
+- Rate limiting: la extracción respeta el header `Retry-After` en respuestas 429 y reintenta con backoff exponencial para errores 5xx.
+- Seguridad: los `.env` contienen credenciales, así que no hay que subirlos a git ni compartirlos por email. El `.gitignore` del repo ya los cubre.
 
 ---
 
 ## Aviso
 
-Este es un proyecto **personal e independiente**, no afiliado a, ni respaldado ni certificado por Trend Micro. "Trend Micro" y "Vision One" son marcas de sus respectivos propietarios; este repositorio solo consume su API pública documentada.
+Este es un proyecto personal e independiente, no afiliado a Trend Micro, ni respaldado ni certificado por ellos. "Trend Micro" y "Vision One" son marcas de sus respectivos propietarios; este repositorio solo consume su API pública documentada.
 
-Es la versión pública de una herramienta que uso en producción. Antes de publicarla se retiraron por completo: nombres y CSVs de clientes reales, un inventario de infraestructura real que estaba hardcodeado en el código, credenciales (`.env`, API keys) y cualquier informe ya generado. Lo que queda es el motor genérico — cualquier `CLIENTES/[empresa]/` que crees tú se queda en tu máquina y nunca se sube al repo gracias al `.gitignore`.
+Es la versión pública de una herramienta que uso en producción. Antes de publicarla se retiraron por completo: nombres y CSVs de clientes reales, un inventario de infraestructura real que estaba hardcodeado en el código, credenciales (`.env`, API keys) y cualquier informe ya generado. Lo que queda es el motor genérico. Cualquier `CLIENTES/[empresa]/` que crees tú se queda en tu máquina y nunca se sube al repo, gracias al `.gitignore`.
 
 ## Licencia
 
-[MIT](LICENSE) — úsalo, modifícalo y redistribúyelo libremente.
+[MIT](LICENSE). Úsalo, modifícalo y redistribúyelo libremente.
 
 ## Autor
 
